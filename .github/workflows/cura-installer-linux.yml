@@ -71,9 +71,6 @@ jobs:
           package_overrides: ${{ inputs.package_overrides }}
           profile: installer.jinja
 
-      - name: Configure GPG Key
-        run: echo -n "${{ secrets.GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
-
       - name: Gather/build the packages
         run: conan install --requires "${{ inputs.cura_conan_version != '' && inputs.cura_conan_version || format('cura/{0}@ultimaker/testing', steps.setup-environment.outputs.package_version) }}" ${{ inputs.conan_args }} --build=missing --update -of cura_inst --deployer-package="*" --profile ${{ steps.set-overrides.outputs.profile }} -c user.sentry:token="${{ secrets.CURAENGINE_SENTRY_TOKEN }}" ${{ inputs.enterprise && '-o "cura/*:enterprise=True"' || '' }} ${{ inputs.staging && '-o "cura/*:staging=True"' || '' }} ${{ inputs.private_data && '-o "cura/*:internal=True"' || '' }}
 
@@ -101,18 +98,6 @@ jobs:
           name: ${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}
           path: dist/
           retention-days: 5
-
-      - name: Upload the asc
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}-asc
-          path: dist/${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}.AppImage.asc
-          retention-days: 5
-
-      - name: Upload the built Package(s)
-        if: ${{ always() }}
-        uses: ultimaker/cura-workflows/.github/actions/upload-conan-package@main
-        continue-on-error: true
 
       - name: Clean local cache
         if: ${{ always() && startsWith(inputs.operating_system, 'self-hosted') }}
