@@ -71,11 +71,6 @@ jobs:
           package_overrides: ${{ inputs.package_overrides }}
           profile: installer.jinja
 
-      - name: Install AppImage builder
-        run: |
-          chmod +x ./Cura-workflows/runner_scripts/appimage_setup.sh
-          ./Cura-workflows/runner_scripts/appimage_setup.sh
-
       - name: Configure GPG Key
         run: echo -n "${{ secrets.GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
 
@@ -103,8 +98,8 @@ jobs:
       - name: Upload the AppImage
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}-AppImage
-          path: dist/${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}.AppImage
+          name: ${{ steps.prepare-distribution.outputs.INSTALLER_FILENAME }}
+          path: dist/
           retention-days: 5
 
       - name: Upload the asc
